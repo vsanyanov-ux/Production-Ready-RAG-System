@@ -1,0 +1,10 @@
+langchain
+langchain-community
+langchain-chroma
+langchain-huggingface
+sentence-transformers
+pypdf
+chromadb
+python-dotenv
+beautifulsoup4
+markdown
