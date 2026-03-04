@@ -1,9 +1,4 @@
-from langchain.chains import RetrievalQA
-from langchain_huggingface import HuggingFacePipeline
 from langchain_core.prompts import PromptTemplate
-from transformers import pipeline
-import torch
-
 from hybrid_retriever import load_prompts
 
 def get_rag_chain(retriever):

@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-# For GigaChat, we use the LangChain integration
-from langchain_gigachat.chat_models import GigaChat
+# For YandexGPT, we use the LangChain community integration
+from langchain_community.chat_models import ChatYandexGPT
 from ragas.llms import LangchainLLMWrapper
 
 def load_golden_dataset(filepath: str = "data/golden_dataset.json"):
@@ -17,7 +17,7 @@ def load_golden_dataset(filepath: str = "data/golden_dataset.json"):
         return json.load(f)
 
 def run_evaluation():
-    print("Starting Evaluation Pipeline with GigaChat...")
+    print("Starting Evaluation Pipeline with YandexGPT...")
     data = load_golden_dataset()
     
     # Prepare data for Ragas expected format
@@ -31,15 +31,20 @@ def run_evaluation():
     
     print("Evaluating Faithfulness...")
     try:
-        # Initialize GigaChat
-        # It requires GIGACHAT_CREDENTIALS environment variable
-        llm = GigaChat(
-            verify_ssl_certs=False, 
-            timeout=6000, 
-            model="GigaChat-Pro" # or standard GigaChat
+        # Initialize YandexGPT
+        yc_api_key = os.getenv("YC_API_KEY")
+        yc_folder_id = os.getenv("YC_FOLDER_ID")
+        
+        if not yc_api_key or not yc_folder_id:
+            raise ValueError("YC_API_KEY and YC_FOLDER_ID environment variables must be set in .env")
+            
+        llm = ChatYandexGPT(
+            api_key=yc_api_key,
+            folder_id=yc_folder_id,
+            model_uri=f"gpt://{yc_folder_id}/yandexgpt/latest",
+            temperature=0.0
         )
         
-        # Wrap it for Ragas
         ragas_llm = LangchainLLMWrapper(llm)
 
         result = evaluate(
@@ -47,8 +52,6 @@ def run_evaluation():
             metrics=[faithfulness],
             llm=ragas_llm
         )
-        print("\nEvaluation Results:")
-        print(result)
         
         # Determine pass/fail based on a threshold
         score = result.get('faithfulness', 0)
