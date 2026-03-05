@@ -58,6 +58,9 @@ def query_system(question: str):
     
     from langchain_community.chat_models import ChatYandexGPT
     from langchain_core.output_parsers import StrOutputParser
+    from dotenv import load_dotenv
+    
+    load_dotenv()
     
     yc_api_key = os.getenv("YC_API_KEY")
     yc_folder_id = os.getenv("YC_FOLDER_ID")
@@ -83,12 +86,14 @@ def query_system(question: str):
     print("="*50)
     print(answer)
     print("="*50 + "\n")
+    
+    return answer, contexts
 
 if __name__ == "__main__":
     print("RAG System (Phase 2 with Re-ranking) Ready.")
     
     # You can uncomment this to index a new document:
-    # ingest_data("data/Progress_and_Poverty.pdf", "pdf")
+    ingest_data("data/Progress_and_Poverty.pdf", "pdf")
     
     # Interactive query loop
     while True:

@@ -4,8 +4,8 @@ from langchain_core.documents import Document
 
 def split_documents(
     documents: List[Document], 
-    chunk_size: int = 800, 
-    chunk_overlap: int = 100
+    chunk_size: int = 1200, 
+    chunk_overlap: int = 200
 ) -> List[Document]:
     """
     Split documents into chunks.
