@@ -84,3 +84,45 @@ python evaluate.py
 3. **Top 10 Chunks -> CrossEncoder Re-Ranking -> Top 3 Chunks**
 4. **Top 3 Chunks + Prompt -> ChatYandexGPT -> Streamlit Interface**
 5. **Background Logging -> LangSmith Trace Export**
+
+```mermaid
+graph TD
+    %% Define Styles
+    classDef ui fill:#4a148c,stroke:#ab47bc,stroke-width:2px,color:#fff;
+    classDef core fill:#1565c0,stroke:#64b5f6,stroke-width:2px,color:#fff;
+    classDef data fill:#2e7d32,stroke:#81c784,stroke-width:2px,color:#fff;
+    classDef llm fill:#e65100,stroke:#ffb74d,stroke-width:2px,color:#fff;
+    classDef config fill:#616161,stroke:#e0e0e0,stroke-width:2px,color:#fff;
+
+    subgraph "Поток 1: Загрузка файлов (Ingestion)"
+        loader[("loader.py\n(Чтение PDF/Web)")]:::data --> splitter[("splitter.py\n(Нарезка на чанки)")]:::data
+        splitter --> vs_add[("vector_store.py\n(Превращение в векторы)")]:::data
+        vs_add --> chroma[("ChromaDB\n(База данных)")]:::data
+    end
+
+    subgraph "Поток 2: Общение с ботом (Query System)"
+        user["Пользователь"] --> app[/"app.py\n(Streamlit UI)"/]:::ui
+        app -- Вопрос --> main["main.py\n(Главный контроллер)"]:::core
+        
+        main -- 1. Запрос 10 кусков --> hybrid["hybrid_retriever.py\n(Hybrid + RRF)"]:::core
+        hybrid --> vs_read["vector_store.py\n(Векторный поиск)"]:::data
+        vs_read --> chroma
+        
+        main -- 2. Фильтрация до 3 кусков --> reranker["reranker.py\n(CrossEncoder)"]:::core
+        
+        main -- 3. Сборка промпта --> ragchain["rag_chain.py\n(Промпт + Цепочка)"]:::core
+        
+        prompts[/"config/prompts.yaml\n(Инструкции)"/]:::config -.-> ragchain
+        
+        ragchain -- 4. Запрос + Топ-3 Куска --> yandex(["YandexGPT API"]):::llm
+        yandex -- Ответ --> main
+        main -- Итоговый ответ + Источники --> app
+    end
+    
+    %% Evaluation Pipeline
+    subgraph "Поток 3: Тестирование перед релизом"
+        golden[/"data/golden_dataset.json\n(Эталонные вопросы)"/]:::config -.-> eval["evaluate.py\n(Оценщик Ragas)"]:::core
+        eval --> yandex_judge(["YandexGPT (Судья)"]):::llm
+        eval -.-> github["GitHub Actions CI/CD"]:::ui
+    end
+
