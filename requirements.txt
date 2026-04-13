@@ -9,3 +9,4 @@ python-dotenv
 beautifulsoup4
 markdown
 streamlit
+yandexcloud
