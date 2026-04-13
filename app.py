@@ -1,4 +1,11 @@
 import streamlit as st
+import sys
+
+# Force UTF-8 for Windows console output
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+
 from main import query_system
 import os
 

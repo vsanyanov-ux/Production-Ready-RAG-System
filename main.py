@@ -1,4 +1,11 @@
 import os
+import sys
+
+# Force UTF-8 for Windows console output
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+
 from loader import load_pdf, load_markdown, load_web_url
 from splitter import split_documents
 from vector_store import get_vector_store, add_documents_to_store
