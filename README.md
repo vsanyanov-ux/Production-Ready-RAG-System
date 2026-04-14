@@ -2,7 +2,7 @@
 
 <div align="center">
   <a href="https://notebooklm.google.com/notebook/7dc475a6-4ff0-4b19-9fa3-48f1ab87bd2f">
-    <img src="presentation_preview.png" alt="NotebookLM Presentation" width="700" style="border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+    <img src="presentation_preview.png" alt="NotebookLM Presentation" width="150" style="border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
   </a>
   <h3>🚀 Interactive Presentation: Project Architecture & Logic</h3>
   <p><i>Click the preview above to explore the deep dive in NotebookLM</i></p>
