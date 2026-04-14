@@ -7,13 +7,20 @@ from langchain_core.documents import Document
 # Use a common open-source embedding model
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
+# Global cache for the embedding model
+_EMBEDDINGS_CACHE = None
+
 def get_vector_store(persist_directory: str = "./chroma_db"):
-    """Initialize or load the Chroma vector store."""
-    embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
+    """Initialize or load the Chroma vector store with cached embeddings."""
+    global _EMBEDDINGS_CACHE
+    
+    if _EMBEDDINGS_CACHE is None:
+        print(f"Loading embedding model: {EMBEDDING_MODEL_NAME}...")
+        _EMBEDDINGS_CACHE = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
     
     vector_store = Chroma(
         persist_directory=persist_directory,
-        embedding_function=embeddings
+        embedding_function=_EMBEDDINGS_CACHE
     )
     return vector_store
 

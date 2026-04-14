@@ -10,3 +10,7 @@ beautifulsoup4
 markdown
 streamlit
 yandexcloud
+langfuse
+ragas
+langchain-openai
+rank_bm25

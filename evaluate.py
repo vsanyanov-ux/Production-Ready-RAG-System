@@ -15,8 +15,8 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-# For YandexGPT, we use the LangChain community integration
-from langchain_community.chat_models import ChatYandexGPT
+# For Gemma (via OpenAI compatible API), we use langchain-openai
+from langchain_openai import ChatOpenAI
 from ragas.llms import LangchainLLMWrapper
 
 def load_golden_dataset(filepath: str = "data/golden_dataset.json"):
@@ -24,7 +24,7 @@ def load_golden_dataset(filepath: str = "data/golden_dataset.json"):
         return json.load(f)
 
 def run_evaluation():
-    print("Starting Evaluation Pipeline with YandexGPT...")
+    print("Starting Evaluation Pipeline with Gemma model...")
     data = load_golden_dataset()
     
     # Prepare data for Ragas expected format
@@ -38,18 +38,20 @@ def run_evaluation():
     
     print("Evaluating Faithfulness...")
     try:
-        # Initialize YandexGPT
-        yc_api_key = os.getenv("YC_API_KEY")
-        yc_folder_id = os.getenv("YC_FOLDER_ID")
+        # Initialize Gemma model
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+        openai_base_url = os.getenv("OPENAI_BASE_URL", "https://api.aitunnel.ru/v1")
+        openai_model = os.getenv("OPENAI_MODEL", "gemma-4-31b-it")
         
-        if not yc_api_key or not yc_folder_id:
-            raise ValueError("YC_API_KEY and YC_FOLDER_ID environment variables must be set in .env")
+        if not openai_api_key:
+            raise ValueError("OPENAI_API_KEY missing in .env")
             
-        llm = ChatYandexGPT(
-            api_key=yc_api_key,
-            folder_id=yc_folder_id,
-            model_uri=f"gpt://{yc_folder_id}/yandexgpt/latest",
-            temperature=0.0
+        llm = ChatOpenAI(
+            api_key=openai_api_key,
+            base_url=openai_base_url,
+            model=openai_model,
+            temperature=0.0,
+            timeout=180
         )
         
         ragas_llm = LangchainLLMWrapper(llm)
@@ -90,7 +92,7 @@ def run_evaluation():
         import traceback
         traceback.print_exc()
         print(f"Evaluation Failed due to error: {repr(e)}")
-        print("Note: Ensure you have set YC_API_KEY and YC_FOLDER_ID environment variables.")
+        print("Note: Ensure you have set OPENAI_API_KEY and OPENAI_BASE_URL variables in .env")
         return 1
 
 if __name__ == "__main__":

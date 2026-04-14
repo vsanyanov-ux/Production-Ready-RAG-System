@@ -1,16 +1,13 @@
 from langchain_core.prompts import PromptTemplate
-from hybrid_retriever import load_prompts
+from langfuse_utils import get_active_prompt
+import os
 
 def get_rag_chain(retriever):
     """
-    Construct a RAG chain with updated prompts and retriever.
+    Construct a RAG chain with prompts fetched from Langfuse.
     """
-    prompts = load_prompts()
-    system_prompt = prompts.get("system_prompt", "")
-    qa_template = prompts.get("qa_template", "")
-    
-    # Combined template
-    full_template = f"{system_prompt}\n\n{qa_template}"
+    prompt_name = os.getenv("LANGFUSE_PROMPT_NAME", "rag_qa")
+    full_template = get_active_prompt(prompt_name)
     
     QA_CHAIN_PROMPT = PromptTemplate.from_template(full_template)
     

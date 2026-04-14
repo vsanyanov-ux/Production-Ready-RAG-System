@@ -13,6 +13,7 @@ class CustomHybridRetriever(BaseRetriever):
     vector_retriever: BaseRetriever
     weights: List[float] = Field(default_factory=lambda: [0.5, 0.5])
     c: int = 60
+    k: int = 10
     
     def _get_relevant_documents(
         self, query: str, *, run_manager: CallbackManagerForRetrieverRun
@@ -24,7 +25,7 @@ class CustomHybridRetriever(BaseRetriever):
         rrf_scores: Dict[str, Dict[str, Any]] = {}
         for weight, docs in zip(self.weights, [bm25_docs, vector_docs]):
             for rank, doc in enumerate(docs):
-                # We use page_content + source as a unique key for deduplication
+                # Use content hash or source+content for deduplication
                 doc_key = f"{doc.page_content}_{doc.metadata.get('source', '')}"
                 if doc_key not in rrf_scores:
                     rrf_scores[doc_key] = {"score": 0.0, "doc": doc}
@@ -32,9 +33,9 @@ class CustomHybridRetriever(BaseRetriever):
                 
         # Sort and return top-k
         sorted_docs = sorted(rrf_scores.values(), key=lambda x: x["score"], reverse=True)
-        return [item["doc"] for item in sorted_docs[:self.bm25_retriever.k]]
+        return [item["doc"] for item in sorted_docs[:self.k]]
 
-def get_hybrid_retriever(vector_store: Chroma, documents: List[Document], k: int = 4):
+def get_hybrid_retriever(vector_store: Chroma, documents: List[Document], k: int = 10):
     """
     Create a custom hybrid retriever combining BM25 and Vector search.
     """
@@ -48,7 +49,8 @@ def get_hybrid_retriever(vector_store: Chroma, documents: List[Document], k: int
     return CustomHybridRetriever(
         bm25_retriever=bm25_retriever,
         vector_retriever=vector_retriever,
-        weights=[0.5, 0.5]
+        weights=[0.3, 0.7], # Give more weight to vector for semantic relevance
+        k=k
     )
 
 def load_prompts(config_path: str = "config/prompts.yaml"):
