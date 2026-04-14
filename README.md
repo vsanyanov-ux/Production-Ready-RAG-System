@@ -16,19 +16,21 @@ A robust, modular, and production-ready Retrieval-Augmented Generation (RAG) bac
 
 *   **Multi-Format Document Ingestion:** Supports loading context from PDF files, Markdown documents, and Web URLs.
 *   **Vector Content Storage:** Uses local ChromaDB combined with standard `SentenceTransformers` embeddings.
+*   **Multi-Query Search Expansion:** Rewrites user queries from multiple perspectives using Mistral Large to combat narrow similarity search limitations.
 *   **Hybrid Search (Lexical + Semantic):** Combines standard BM25 keyword search with dense vector search to retrieve documents accurately even using specific IDs, acronyms, or misspellings.
 *   **Reciprocal Rank Fusion (RRF):** Custom robust implementation to mathematically merge and normalize search results from BM25 and Vector retrievers.
 *   **Cross-Encoder Re-Ranking:** Implements a second-stage retrieval pipeline using MS MARCO MiniLM cross-encoder to accurately score and re-order the retrieved chunks for maximum relevance to the user's query.
 *   **Citation & Prompt Management:** Strict system prompts managed externally (`config/prompts.yaml`) forcing the LLM to ground its answers exclusively in retrieved contexts and cite sources.
-*   **Automated Evaluation Pipeline (CI/CD Ready):** Includes a `golden_dataset.json` and a script (`evaluate.py`) that utilizes the **Ragas** framework to evaluate the Faithfulness of the system using YandexGPT, natively returning exit codes suitable for GitHub Actions.
+*   **Automated Evaluation Pipeline (CI/CD Ready):** Includes a `golden_dataset.json` and a script (`evaluate_langfuse.py`) that utilizes the **Ragas** framework to evaluate standard RAG metrics.
+*   **Observability & Tracing:** Full integration with **Langfuse** for deep visibility into LLM calls, token usage, latency, and automated metric extraction.
 *   **Conversational Web UI:** A beautiful web interface built with **Streamlit** (`app.py`), featuring chat history, AI typing indicators, and expandable source context wrappers.
-*   **Observability & Tracing:** Full integration with **LangSmith** for deep visibility into LLM calls, token usage, latency, and retrieval performance without any code changes.
 
 ## 🛠️ Tech Stack
 *   **Frameworks:** LangChain, HuggingFace Transformers, Streamlit
 *   **Databases:** ChromaDB
-*   **Algorithms:** BM25 (Rank-BM25), RRF, CrossEncoder
-*   **Evaluation & Observability:** Ragas, YandexGPT API, LangSmith
+*   **LLMs:** Mistral Large 3 (via local proxy)
+*   **Algorithms:** BM25 (Rank-BM25), RRF, CrossEncoder, Multi-Query Expansion
+*   **Evaluation & Observability:** Ragas, Langfuse
 *   **CI/CD:** GitHub Actions
 
 ## 📂 Project Structure & File Index
@@ -38,10 +40,12 @@ A robust, modular, and production-ready Retrieval-Augmented Generation (RAG) bac
 * **`loader.py`** — Parsers for loading content from PDFs, Markdown files, and Web URLs.
 * **`splitter.py`** — Text chunking logic using `RecursiveCharacterTextSplitter`. Optimized for 1200 character chunks with 200 overlap.
 * **`vector_store.py`** — Manages the local ChromaDB vector database and text embeddings.
+* **`query_expansion.py`** — LLM-based query variation mechanism to handle broad, ambiguous, or poorly-stated user inputs.
 * **`hybrid_retriever.py`** — Implements Hybrid Search (BM25 + Semantic Vector) with Reciprocal Rank Fusion (RRF).
 * **`reranker.py`** — Implements second-stage retrieval using a HuggingFace `CrossEncoder` to re-order the retrieved chunks by strict relevance.
 * **`rag_chain.py`** — Connects the prompt and the LLM using LangChain Expression Language (LCEL).
-* **`evaluate.py`** — Automated evaluation pipeline script using the **Ragas** framework to score AI responses for Faithfulness.
+* **`evaluate_langfuse.py`** — Automated evaluation pipeline script using the **Ragas** framework and Langfuse integration.
+* **`langfuse_utils.py`** — Handles prompt management and testing metrics upload to Langfuse servers.
 * **`config/prompts.yaml`** — Externalized management of the System Prompt and generation rules.
 * **`data/golden_dataset.json`** — The ground-truth testing dataset (Questions, Contexts, Answers) used for validation.
 
