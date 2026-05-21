@@ -45,13 +45,13 @@ if not os.getenv("AITUNNEL_API_KEY") or os.getenv("AITUNNEL_API_KEY") == "your_k
 st.sidebar.title("🛠️ Settings")
 selected_model = st.sidebar.selectbox(
     "Select LLM Model",
-    options=["mistral-large", "mistral-medium", "mistral-small"],
+    options=["mistral-large-latest", "mistral-medium-latest", "mistral-small-latest"],
     index=0,
-    help="Models are proxied through your local LiteLLM Reverse Proxy or Aitunnel fallback."
+    help="Models are requested directly from Mistral API."
 )
 
 st.title("📚 Intelligent RAG Assistant")
-st.markdown(f"Ask anything about your documents. Primary: **{selected_model}** (Local Proxy) | Fallback: **Aitunnel**.")
+st.markdown(f"Ask anything about your documents. Primary: **{selected_model}** (Direct API) | Fallback: **Aitunnel**.")
 
 # Display Chat History
 for message in st.session_state.messages:

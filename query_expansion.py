@@ -20,7 +20,9 @@ def generate_multi_queries(question: str, model_name: str = None) -> List[str]:
         api_key=api_key,
         base_url=base_url,
         model=model,
-        temperature=0.1 # Low temperature for consistency but some variety
+        temperature=0.1, # Low temperature for consistency but some variety
+        timeout=10,      # Prevent hanging if primary LLM is down
+        max_retries=0    # Fail fast to trigger fallback
     )
 
     prompt = ChatPromptTemplate.from_messages([
@@ -33,7 +35,13 @@ def generate_multi_queries(question: str, model_name: str = None) -> List[str]:
 
     try:
         response = chain.invoke({"question": question})
-        queries = response.get("queries", [])
+        if isinstance(response, list):
+            queries = response
+        elif isinstance(response, dict):
+            queries = response.get("queries", [])
+        else:
+            queries = []
+            
         # Ensure we always include the original question
         if question not in queries:
             queries.append(question)

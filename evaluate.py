@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-# For Gemma (via OpenAI compatible API), we use langchain-openai
+# For Mistral (via OpenAI compatible API), we use langchain-openai
 from langchain_openai import ChatOpenAI
 from ragas.llms import LangchainLLMWrapper
 
@@ -24,7 +24,7 @@ def load_golden_dataset(filepath: str = "data/golden_dataset.json"):
         return json.load(f)
 
 def run_evaluation():
-    print("Starting Evaluation Pipeline with Gemma model...")
+    print("Starting Evaluation Pipeline with Mistral Large model...")
     data = load_golden_dataset()
     
     # Prepare data for Ragas expected format
@@ -38,10 +38,10 @@ def run_evaluation():
     
     print("Evaluating Faithfulness...")
     try:
-        # Initialize Gemma model
+        # Initialize Mistral model
         openai_api_key = os.getenv("OPENAI_API_KEY")
-        openai_base_url = os.getenv("OPENAI_BASE_URL", "https://api.aitunnel.ru/v1")
-        openai_model = os.getenv("OPENAI_MODEL", "gemma-4-31b-it")
+        openai_base_url = os.getenv("OPENAI_BASE_URL", "https://api.mistral.ai/v1")
+        openai_model = os.getenv("OPENAI_MODEL", "mistral-large-latest")
         
         if not openai_api_key:
             raise ValueError("OPENAI_API_KEY missing in .env")

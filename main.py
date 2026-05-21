@@ -54,9 +54,7 @@ def get_all_documents(store):
         docs.append(Document(page_content=content, metadata=metadata))
     return docs
 
-from langfuse import observe
-from langfuse import propagate_attributes, Langfuse
-from langfuse.langchain import CallbackHandler
+from langfuse import observe, propagate_attributes, Langfuse, get_client
 
 
 # --- Cache Setup ---
@@ -146,19 +144,53 @@ def query_system(question: str, session_id: str = None, model_name: str = None, 
         from langchain_core.output_parsers import StrOutputParser
         from openai import APIConnectionError
 
-        def get_llm(base_url, api_key, model):
+        def get_llm(base_url, api_key, model, timeout=60):
             return ChatOpenAI(
                 api_key=api_key,
                 base_url=base_url,
                 model=model,
                 temperature=0.0,
-                timeout=60 # Shorter timeout for primary to fail fast
+                timeout=timeout 
             )
 
         # Primary attempt: Local Proxy/LiteLLM
         primary_api_key = os.getenv("OPENAI_API_KEY")
         primary_base_url = os.getenv("OPENAI_BASE_URL", "http://localhost:4000")
         primary_model = model_name if model_name else os.getenv("OPENAI_MODEL", "mistral-large")
+        
+        @observe(as_type="generation")
+        def generate_answer_with_metrics(chain, question, context_text, model_name, attempt="primary"):
+            # Use the global decorator context helper if available, or the client
+            client = get_client()
+            
+            # Start/Update generation with input and model name
+            # Standard v4 pattern: update the current generation trace
+            client.update_current_generation(
+                input={"question": question, "context": context_text},
+                model=model_name,
+                metadata={"attempt": attempt}
+            )
+            
+            response = chain.invoke({"context": context_text, "question": question})
+            answer = response.content
+            usage = response.response_metadata.get("token_usage", {})
+            
+            if usage:
+                in_tk = usage.get("prompt_tokens", 0)
+                out_tk = usage.get("completion_tokens", 0)
+                # Mistral Large 3 Pricing: $0.50/1M input, $1.50/1M output
+                cost_usd = (in_tk * 0.50 + out_tk * 1.50) / 1000000
+                
+                # Standard v4 keys for this version: usage_details and cost_details
+                client.update_current_generation(
+                    usage_details={"input": in_tk, "output": out_tk},
+                    cost_details={"total": cost_usd},
+                    output=answer
+                )
+                print(f"💰 [{model_name}] Cost: ${cost_usd:.6f} | Tokens: {in_tk}i/{out_tk}o")
+            else:
+                client.update_current_generation(output=answer)
+            return answer
 
         try:
             print(f"Connecting to primary LLM: {primary_model} @ {primary_base_url}...")
@@ -166,13 +198,11 @@ def query_system(question: str, session_id: str = None, model_name: str = None, 
             
             retriever_placeholder = store.as_retriever(search_kwargs={"k": 10})
             _, prompt_temp = get_rag_chain(retriever_placeholder)
-            chain = prompt_temp | llm | StrOutputParser()
+            chain = prompt_temp | llm
             
-            langfuse_handler = CallbackHandler()
-            answer = chain.invoke(
-                {"context": context_text, "question": question},
-                config={"callbacks": [langfuse_handler]}
-            )
+            # Using the v4.x helper for cost capture
+            answer = generate_answer_with_metrics(chain, question, context_text, primary_model, attempt="primary")
+            
         except (APIConnectionError, Exception) as e:
             print(f"⚠️ Primary LLM failed: {e}")
             print("🔄 Switching to Fallback (Aitunnel.ru)...")
@@ -185,13 +215,15 @@ def query_system(question: str, session_id: str = None, model_name: str = None, 
                 print("❌ Error: AITUNNEL_API_KEY not set. Cannot fallback.")
                 return "Error: Primary failed and no fallback key provided.", contexts
 
-            llm = get_llm(fallback_base_url, fallback_api_key, fallback_model)
-            chain = prompt_temp | llm | StrOutputParser()
-            
-            answer = chain.invoke(
-                {"context": context_text, "question": question},
-                config={"callbacks": [langfuse_handler]}
-            )
+            try:
+                llm = get_llm(fallback_base_url, fallback_api_key, fallback_model, timeout=120)
+                chain = prompt_temp | llm
+                
+                answer = generate_answer_with_metrics(chain, question, context_text, fallback_model, attempt="fallback")
+            except Exception as fallback_e:
+                print(f"❌ Fallback LLM also failed: {fallback_e}")
+                return "⚠️ **Connection Error:** Both the Primary and Fallback LLMs failed to connect. Please check your internet connection, API keys, or try again later.", contexts
+
 
         # Save to cache
         cache.set(cache_key, {"answer": answer, "contexts": contexts})

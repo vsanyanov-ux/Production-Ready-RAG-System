@@ -10,7 +10,7 @@
 
 ---
 
-A robust, modular, and production-ready Retrieval-Augmented Generation (RAG) backend. This project goes beyond basic prototypes by implementing advanced retrieval techniques (Hybrid Search + Reciprocal Rank Fusion), re-ranking (CrossEncoder), an automated evaluation pipeline (LLM-as-a-Judge using Ragas and YandexGPT), and a beautiful Streamlit chat UI.
+A robust, modular, and production-ready Retrieval-Augmented Generation (RAG) backend. This project goes beyond basic prototypes by implementing advanced retrieval techniques (Hybrid Search + Reciprocal Rank Fusion), re-ranking (CrossEncoder), an automated evaluation pipeline (LLM-as-a-Judge using Ragas and Mistral Large), and a beautiful Streamlit chat UI.
 
 ## 🌟 Key Features
 
@@ -21,8 +21,8 @@ A robust, modular, and production-ready Retrieval-Augmented Generation (RAG) bac
 *   **Reciprocal Rank Fusion (RRF):** Custom robust implementation to mathematically merge and normalize search results from BM25 and Vector retrievers.
 *   **Cross-Encoder Re-Ranking:** Implements a second-stage retrieval pipeline using MS MARCO MiniLM cross-encoder to accurately score and re-order the retrieved chunks for maximum relevance to the user's query.
 *   **Citation & Prompt Management:** Strict system prompts managed externally (`config/prompts.yaml`) forcing the LLM to ground its answers exclusively in retrieved contexts and cite sources.
-*   **Automated Evaluation Pipeline (CI/CD Ready):** Includes a `golden_dataset.json` and a script (`evaluate_langfuse.py`) that utilizes the **Ragas** framework to evaluate standard RAG metrics.
-*   **Observability & Tracing:** Full integration with **Langfuse** for deep visibility into LLM calls, token usage, latency, and automated metric extraction.
+*   **Automated Evaluation Pipeline (CI/CD Ready):** Includes a `golden_dataset.json` and a script (`evaluate.py`) that utilizes the **Ragas** framework to evaluate standard RAG metrics.
+*   **Observability & Tracing:** Full integration with **Langfuse v4** for deep visibility into LLM calls, exact token cost calculation, latency, and automated metric extraction.
 *   **Conversational Web UI:** A beautiful web interface built with **Streamlit** (`app.py`), featuring chat history, AI typing indicators, and expandable source context wrappers.
 
 ## 🛠️ Tech Stack
@@ -44,7 +44,7 @@ A robust, modular, and production-ready Retrieval-Augmented Generation (RAG) bac
 * **`hybrid_retriever.py`** — Implements Hybrid Search (BM25 + Semantic Vector) with Reciprocal Rank Fusion (RRF).
 * **`reranker.py`** — Implements second-stage retrieval using a HuggingFace `CrossEncoder` to re-order the retrieved chunks by strict relevance.
 * **`rag_chain.py`** — Connects the prompt and the LLM using LangChain Expression Language (LCEL).
-* **`evaluate_langfuse.py`** — Automated evaluation pipeline script using the **Ragas** framework and Langfuse integration.
+* **`evaluate.py`** — Automated evaluation pipeline script using the **Ragas** framework and Langfuse integration.
 * **`langfuse_utils.py`** — Handles prompt management and testing metrics upload to Langfuse servers.
 * **`config/prompts.yaml`** — Externalized management of the System Prompt and generation rules.
 * **`data/golden_dataset.json`** — The ground-truth testing dataset (Questions, Contexts, Answers) used for validation.
@@ -90,7 +90,7 @@ To check the system's performance and ensure the LLM isn't hallucinating, run th
 ```bash
 python evaluate.py
 ```
-*Note: This utilizes YandexGPT as an LLM judge to score the Faithfulness metric and ensure answers meet the 0.85 strict threshold.*
+*Note: This utilizes Mistral Large as an LLM judge to score the Faithfulness metric and ensure answers meet the 0.85 strict threshold.*
 
 ## 📈 System Architecture Pipeline
 1. **Load -> Chunk -> Embed -> ChromaDB**
@@ -136,7 +136,7 @@ graph TD
     %% Evaluation Pipeline
     subgraph "Поток 3: Тестирование перед релизом"
         golden[/"data/golden_dataset.json\n(Эталонные вопросы)"/]:::config -.-> eval["evaluate.py\n(Оценщик Ragas)"]:::core
-        eval --> yandex_judge(["YandexGPT (Судья)"]):::llm
+        eval --> mistral_judge(["Mistral Large (Судья)"]):::llm
         eval -.-> github["GitHub Actions CI/CD"]:::ui
     end
 
