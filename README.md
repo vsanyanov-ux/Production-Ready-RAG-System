@@ -63,17 +63,21 @@ pip install -r requirements.txt
 ```
 
 ### 2. Configuration
-Create a `.env` file in the root directory and add your Yandex Cloud and LangSmith credentials:
+Create a `.env` file in the root directory and add your API keys and Langfuse credentials:
 ```env
-# Required for LangChain LLM generation
-YC_API_KEY=your_yandex_api_key
-YC_FOLDER_ID=your_yandex_folder_id
+# Required for primary LLM generation
+OPENAI_API_KEY=your_primary_api_key
+OPENAI_BASE_URL=http://localhost:4000
+OPENAI_MODEL=mistral-large
 
-# Required for LangSmith full-stack tracing
-LANGCHAIN_TRACING_V2=true
-LANGCHAIN_ENDPOINT="https://api.smith.langchain.com"
-LANGCHAIN_API_KEY=your_langsmith_api_key
-LANGCHAIN_PROJECT="YandexGPT-RAG"
+# Fallback LLM credentials
+AITUNNEL_API_KEY=your_aitunnel_key
+AITUNNEL_BASE_URL=https://api.aitunnel.ru/v1
+
+# Required for Langfuse observability
+LANGFUSE_SECRET_KEY=your_langfuse_secret
+LANGFUSE_PUBLIC_KEY=your_langfuse_public
+LANGFUSE_HOST="https://cloud.langfuse.com"
 ```
 
 ### 3. Usage (Web Interface)
@@ -96,8 +100,8 @@ python evaluate.py
 1. **Load -> Chunk -> Embed -> ChromaDB**
 2. **User Query -> BM25 Retriever & Vector Retriever -> RRF Normalization**
 3. **Top 10 Chunks -> CrossEncoder Re-Ranking -> Top 3 Chunks**
-4. **Top 3 Chunks + Prompt -> ChatYandexGPT -> Streamlit Interface**
-5. **Background Logging -> LangSmith Trace Export**
+4. **Top 3 Chunks + Prompt -> Mistral Large API -> Streamlit Interface**
+5. **Background Logging -> Langfuse Trace Export**
 
 ```mermaid
 graph TD
@@ -128,8 +132,8 @@ graph TD
         
         prompts[/"config/prompts.yaml\n(Инструкции)"/]:::config -.-> ragchain
         
-        ragchain -- 4. Запрос + Топ-3 Куска --> yandex(["YandexGPT API"]):::llm
-        yandex -- Ответ --> main
+        ragchain -- 4. Запрос + Топ-3 Куска --> llm_api(["Mistral Large API"]):::llm
+        llm_api -- Ответ --> main
         main -- Итоговый ответ + Источники --> app
     end
     
