@@ -1,69 +1,69 @@
-# Production-Ready RAG System
+# Готовая к продакшену RAG Система
 
 <div align="center">
   <a href="https://notebooklm.google.com/notebook/5dd88fdb-7346-4924-979b-32326fcd9c67">
     <img src="presentation_preview.png" alt="NotebookLM Presentation" width="150" style="border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
   </a>
-  <h3>🚀 Interactive Presentation: Project Architecture & Logic</h3>
-  <p><i>Click the preview above to explore the deep dive in NotebookLM</i></p>
+  <h3>🚀 Интерактивная презентация: Архитектура и логика проекта</h3>
+  <p><i>Нажмите на превью выше, чтобы изучить подробный разбор в NotebookLM</i></p>
 </div>
 
 ---
 
-A robust, modular, and production-ready Retrieval-Augmented Generation (RAG) backend. This project goes beyond basic prototypes by implementing advanced retrieval techniques (Hybrid Search + Reciprocal Rank Fusion), re-ranking (CrossEncoder), an automated evaluation pipeline (LLM-as-a-Judge using Ragas and Mistral Large), and a beautiful Streamlit chat UI.
+Надежный, модульный и готовый к продакшену бэкенд для Retrieval-Augmented Generation (RAG). Этот проект выходит за рамки базовых прототипов, внедряя продвинутые методы поиска (гибридный поиск + Reciprocal Rank Fusion), реранжирование (CrossEncoder), автоматизированный пайплайн оценки (LLM-судья с использованием Ragas и Mistral Large), а также красивый чат-интерфейс на Streamlit.
 
-## 🌟 Key Features
+## 🌟 Ключевые особенности
 
-*   **Multi-Format Document Ingestion:** Supports loading context from PDF files, Markdown documents, and Web URLs.
-*   **Vector Content Storage:** Uses local ChromaDB combined with standard `SentenceTransformers` embeddings.
-*   **Multi-Query Search Expansion:** Rewrites user queries from multiple perspectives using Mistral Large to combat narrow similarity search limitations.
-*   **Hybrid Search (Lexical + Semantic):** Combines standard BM25 keyword search with dense vector search to retrieve documents accurately even using specific IDs, acronyms, or misspellings.
-*   **Reciprocal Rank Fusion (RRF):** Custom robust implementation to mathematically merge and normalize search results from BM25 and Vector retrievers.
-*   **Cross-Encoder Re-Ranking:** Implements a second-stage retrieval pipeline using MS MARCO MiniLM cross-encoder to accurately score and re-order the retrieved chunks for maximum relevance to the user's query.
-*   **Citation & Prompt Management:** Strict system prompts managed externally (`config/prompts.yaml`) forcing the LLM to ground its answers exclusively in retrieved contexts and cite sources.
-*   **Automated Evaluation Pipeline (CI/CD Ready):** Includes a `golden_dataset.json` and a script (`evaluate.py`) that utilizes the **Ragas** framework to evaluate standard RAG metrics.
-*   **Observability & Tracing:** Full integration with **Langfuse v4** for deep visibility into LLM calls, exact token cost calculation, latency, and automated metric extraction.
-*   **Conversational Web UI:** A beautiful web interface built with **Streamlit** (`app.py`), featuring chat history, AI typing indicators, and expandable source context wrappers.
+*   **Загрузка документов в разных форматах:** Поддержка загрузки контекста из PDF-файлов, Markdown-документов и веб-ссылок.
+*   **Векторное хранилище контента:** Использование локальной базы ChromaDB в связке со стандартными эмбеддингами `SentenceTransformers`.
+*   **Мульти-запросное расширение поиска:** Переписывание запросов пользователя с разных точек зрения с помощью Mistral Large для преодоления ограничений узкого поиска по сходству.
+*   **Гибридный поиск (Лексический + Семантический):** Объединение стандартного поиска по ключевым словам (BM25) с плотным векторным поиском для точного извлечения документов, даже при использовании специфичных ID, акронимов или опечаток.
+*   **Reciprocal Rank Fusion (RRF):** Собственная надежная реализация для математического слияния и нормализации результатов поиска от BM25 и векторного ретривера.
+*   **Реранжирование через Cross-Encoder:** Реализация второго этапа поиска с использованием кросс-энкодера MS MARCO MiniLM для точной оценки и переупорядочивания найденных фрагментов текста (чанков) с целью максимальной релевантности запросу.
+*   **Управление промптами и цитированием:** Строгие системные промпты, управляемые извне (`config/prompts.yaml`), заставляющие LLM основывать свои ответы исключительно на найденном контексте и указывать источники.
+*   **Автоматизированный пайплайн оценки (Готов к CI/CD):** Включает `golden_dataset.json` и скрипт (`evaluate.py`), который использует фреймворк **Ragas** для оценки стандартных RAG-метрик.
+*   **Наблюдаемость и трассировка (Observability):** Полная интеграция с **Langfuse v4** для глубокого мониторинга вызовов LLM, точного расчета стоимости токенов, задержки и автоматического извлечения метрик.
+*   **Разговорный веб-интерфейс:** Красивый интерфейс на **Streamlit** (`app.py`), включающий историю чата, индикаторы набора текста AI и раскрывающиеся блоки с контекстом-источником.
 
-## 🛠️ Tech Stack
-*   **Frameworks:** LangChain, HuggingFace Transformers, Streamlit
-*   **Databases:** ChromaDB
-*   **LLMs:** Mistral Large 3 (via local proxy)
-*   **Algorithms:** BM25 (Rank-BM25), RRF, CrossEncoder, Multi-Query Expansion
-*   **Evaluation & Observability:** Ragas, Langfuse
+## 🛠️ Технологический стек
+*   **Фреймворки:** LangChain, HuggingFace Transformers, Streamlit
+*   **Базы данных:** ChromaDB
+*   **Языковые модели (LLM):** Mistral Large 3 (через локальный прокси)
+*   **Алгоритмы:** BM25 (Rank-BM25), RRF, CrossEncoder, Multi-Query Expansion
+*   **Оценка и мониторинг:** Ragas, Langfuse
 *   **CI/CD:** GitHub Actions
 
-## 📂 Project Structure & File Index
+## 📂 Структура проекта и файлы
 
-* **`app.py`** — The Streamlit graphical web interface. Run this to chat with your documents in the browser.
-* **`main.py`** — The backend system core. Exports the `query_system` and `ingest_data` functions to the frontend.
-* **`loader.py`** — Parsers for loading content from PDFs, Markdown files, and Web URLs.
-* **`splitter.py`** — Text chunking logic using `RecursiveCharacterTextSplitter`. Optimized for 1200 character chunks with 200 overlap.
-* **`vector_store.py`** — Manages the local ChromaDB vector database and text embeddings.
-* **`query_expansion.py`** — LLM-based query variation mechanism to handle broad, ambiguous, or poorly-stated user inputs.
-* **`hybrid_retriever.py`** — Implements Hybrid Search (BM25 + Semantic Vector) with Reciprocal Rank Fusion (RRF).
-* **`reranker.py`** — Implements second-stage retrieval using a HuggingFace `CrossEncoder` to re-order the retrieved chunks by strict relevance.
-* **`rag_chain.py`** — Connects the prompt and the LLM using LangChain Expression Language (LCEL).
-* **`evaluate.py`** — Automated evaluation pipeline script using the **Ragas** framework and Langfuse integration.
-* **`langfuse_utils.py`** — Handles prompt management and testing metrics upload to Langfuse servers.
-* **`config/prompts.yaml`** — Externalized management of the System Prompt and generation rules.
-* **`data/golden_dataset.json`** — The ground-truth testing dataset (Questions, Contexts, Answers) used for validation.
+* **`app.py`** — Графический веб-интерфейс на Streamlit. Запустите его, чтобы общаться с документами в браузере.
+* **`main.py`** — Ядро бэкенда системы. Экспортирует функции `query_system` и `ingest_data` для фронтенда.
+* **`loader.py`** — Парсеры для загрузки контента из PDF, Markdown-файлов и веб-ссылок.
+* **`splitter.py`** — Логика нарезки текста с помощью `RecursiveCharacterTextSplitter`. Оптимизировано под чанки в 1200 символов с перекрытием 200.
+* **`vector_store.py`** — Управление локальной векторной базой ChromaDB и текстовыми эмбеддингами.
+* **`query_expansion.py`** — Механизм вариации запросов на базе LLM для обработки широких, неоднозначных или нечетко сформулированных вводов пользователя.
+* **`hybrid_retriever.py`** — Реализация гибридного поиска (BM25 + Семантический вектор) с Reciprocal Rank Fusion (RRF).
+* **`reranker.py`** — Реализация второго этапа поиска с использованием `CrossEncoder` от HuggingFace для переупорядочивания фрагментов по строгой релевантности.
+* **`rag_chain.py`** — Связующее звено между промптом и LLM через LangChain Expression Language (LCEL).
+* **`evaluate.py`** — Скрипт автоматизированного пайплайна оценки с использованием фреймворка **Ragas** и интеграцией с Langfuse.
+* **`langfuse_utils.py`** — Обработка управления промптами и отправка метрик тестирования на серверы Langfuse.
+* **`config/prompts.yaml`** — Вынесенное управление системными промптами и правилами генерации.
+* **`data/golden_dataset.json`** — Эталонный набор данных для тестирования (Вопросы, Контексты, Ответы), используемый для валидации.
 
-## 🚀 Getting Started
+## 🚀 Быстрый старт
 
-### 1. Installation
+### 1. Установка
 
-Clone the repository and install the dependencies:
+Склонируйте репозиторий и установите зависимости:
 ```bash
 git clone <your-repo-url>
 cd RAG
 python -m venv venv
-source venv/bin/activate  # Or `venv\Scripts\activate` on Windows
+source venv/bin/activate  # Или `venv\Scripts\activate` на Windows
 pip install -r requirements.txt
 ```
 
-### 2. Configuration
-Create a `.env` file in the root directory and add your API keys and Langfuse credentials:
+### 2. Конфигурация
+Создайте файл `.env` в корневой директории и добавьте ваши API ключи и доступы к Langfuse:
 ```env
 # Required for primary LLM generation
 OPENAI_API_KEY=your_primary_api_key
@@ -80,28 +80,28 @@ LANGFUSE_PUBLIC_KEY=your_langfuse_public
 LANGFUSE_HOST="https://cloud.langfuse.com"
 ```
 
-### 3. Usage (Web Interface)
+### 3. Использование (Веб-интерфейс)
 
-The easiest way to interact with the system is via the beautiful Streamlit UI:
+Самый простой способ взаимодействия с системой — через красивый интерфейс Streamlit:
 ```bash
 streamlit run app.py
 ```
-This will launch a conversational interface on `http://localhost:8501`.
+Это запустит диалоговый интерфейс по адресу `http://localhost:8501`.
 
-### 4. Running the Evaluation
+### 4. Запуск оценки системы
 
-To check the system's performance and ensure the LLM isn't hallucinating, run the evaluation script against the Golden Dataset:
+Чтобы проверить производительность системы и убедиться, что LLM не галлюцинирует, запустите скрипт оценки на эталонном наборе (Golden Dataset):
 ```bash
 python evaluate.py
 ```
-*Note: This utilizes Mistral Large as an LLM judge to score the Faithfulness metric and ensure answers meet the 0.85 strict threshold.*
+*Примечание: В качестве LLM-судьи используется Mistral Large, чтобы оценивать метрику "Правдивость" (Faithfulness) и гарантировать, что ответы соответствуют строгому порогу 0.85.*
 
-## 📈 System Architecture Pipeline
-1. **Load -> Chunk -> Embed -> ChromaDB**
-2. **User Query -> BM25 Retriever & Vector Retriever -> RRF Normalization**
-3. **Top 10 Chunks -> CrossEncoder Re-Ranking -> Top 3 Chunks**
-4. **Top 3 Chunks + Prompt -> Mistral Large API -> Streamlit Interface**
-5. **Background Logging -> Langfuse Trace Export**
+## 📈 Архитектурный пайплайн системы
+1. **Загрузка -> Нарезка (Chunk) -> Эмбеддинги -> ChromaDB**
+2. **Запрос пользователя -> BM25 Retriever и Vector Retriever -> Нормализация RRF**
+3. **Топ 10 Чанков -> Реранжирование CrossEncoder -> Топ 3 Чанка**
+4. **Топ 3 Чанка + Промпт -> Mistral Large API -> Интерфейс Streamlit**
+5. **Фоновое логирование -> Экспорт трассировок в Langfuse**
 
 ```mermaid
 graph TD
@@ -143,4 +143,4 @@ graph TD
         eval --> mistral_judge(["Mistral Large (Судья)"]):::llm
         eval -.-> github["GitHub Actions CI/CD"]:::ui
     end
-
+```
