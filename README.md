@@ -1,7 +1,7 @@
 # Production-Ready RAG System
 
 <div align="center">
-  <a href="https://notebooklm.google.com/notebook/7dc475a6-4ff0-4b19-9fa3-48f1ab87bd2f">
+  <a href="https://notebooklm.google.com/notebook/5dd88fdb-7346-4924-979b-32326fcd9c67">
     <img src="presentation_preview.png" alt="NotebookLM Presentation" width="150" style="border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
   </a>
   <h3>🚀 Interactive Presentation: Project Architecture & Logic</h3>
