@@ -23,3 +23,11 @@ venv_*/
 # Project specific
 chroma_db/
 data/
+
+chroma_db_local/
+
+data_backup/
+
+*.txt
+
+!requirements.txt

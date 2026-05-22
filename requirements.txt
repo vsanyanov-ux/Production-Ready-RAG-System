@@ -12,5 +12,6 @@ streamlit
 yandexcloud
 langfuse
 ragas
-langchain-openai
+langchain-ollama
 rank_bm25
+python-docx

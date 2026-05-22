@@ -1,0 +1,74 @@
+version: '3.5'
+
+services:
+  app:
+    build: .
+    image: corporate-bot-app
+    ports:
+      - "8501:8501"
+    environment:
+      - LANGFUSE_PUBLIC_KEY=pk-lf-f6e2b801-3964-4228-b8f1-118c8b8c9008
+      - LANGFUSE_SECRET_KEY=sk-lf-33485ae5-873f-4524-be99-d4ecc864bfa3
+      - LANGFUSE_HOST=http://langfuse-server:3000
+      - OLLAMA_HOST=http://host.docker.internal:11434
+    depends_on:
+      - langfuse-server
+      - ollama
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data:/app/data
+      - ./chroma_db:/app/chroma_db
+    restart: always
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: corporate-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama_data:/root/.ollama
+    restart: always
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  langfuse-server:
+    image: langfuse/langfuse:2
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=mysecret
+      - SALT=mysalt
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+      - LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES=true
+    restart: always
+
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - langfuse-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  langfuse-db-data:
